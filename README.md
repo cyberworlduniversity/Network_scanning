@@ -1,55 +1,75 @@
 # Network Scanner
 
+A Python 3 command-line utility that discovers responding IPv4 hosts on a local network using ARP. Use it only on networks you own or have explicit permission to assess.
 
-<pre>
-$$\   $$\            $$\                                       $$\              $$$$$$\                                                             
-$$$\  $$ |           $$ |                                      $$ |            $$  __$$\                                                            
-$$$$\ $$ | $$$$$$\ $$$$$$\   $$\  $$\  $$\  $$$$$$\   $$$$$$\  $$ |  $$\       $$ /  \__| $$$$$$$\ $$$$$$\  $$$$$$$\  $$$$$$$\   $$$$$$\   $$$$$$\  
-$$ $$\$$ |$$  __$$\\_$$  _|  $$ | $$ | $$ |$$  __$$\ $$  __$$\ $$ | $$  |      \$$$$$$\  $$  _____|\____$$\ $$  __$$\ $$  __$$\ $$  __$$\ $$  __$$\ 
-$$ \$$$$ |$$$$$$$$ | $$ |    $$ | $$ | $$ |$$ /  $$ |$$ |  \__|$$$$$$  /        \____$$\ $$ /      $$$$$$$ |$$ |  $$ |$$ |  $$ |$$$$$$$$ |$$ |  \__|
-$$ |\$$$ |$$   ____| $$ |$$\ $$ | $$ | $$ |$$ |  $$ |$$ |      $$  _$$<        $$\   $$ |$$ |     $$  __$$ |$$ |  $$ |$$ |  $$ |$$   ____|$$ |      
-$$ | \$$ |\$$$$$$$\  \$$$$  |\$$$$$\$$$$  |\$$$$$$  |$$ |      $$ | \$$\       \$$$$$$  |\$$$$$$$\\$$$$$$$ |$$ |  $$ |$$ |  $$ |\$$$$$$$\ $$ |      
-\__|  \__| \_______|  \____/  \_____\____/  \______/ \__|      \__|  \__|       \______/  \_______|\_______|\__|  \__|\__|  \__| \_______|\__|      
-                                                                                                                                                    
-~hemanathan115                                                                                                                                                 
-                                                                                                                                                    
+## Requirements
 
-</pre>
-<br>
+- Python 3.10+
+- Scapy (installed from `requirements.txt`)
+- A network interface connected to the target LAN
+- Appropriate packet-capture privileges (often administrator/root)
 
+## Install
 
-### This is a python based command line Network Scanner utility, which takes input as an argument for the exact IP address or the relative IP Address range you wish to do the Network Scan for and returns all the available IP addresses with their MAC addresses on your current Network.
+```bash
+python -m venv .venv
+# Linux/macOS
+source .venv/bin/activate
+# Windows PowerShell: .venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
 
+## Run
 
-<hr><br>
+```bash
+python network_scanner.py --help
+sudo python network_scanner.py --target 192.168.1.0/24
+```
 
+On Windows, open an elevated terminal and run the command without `sudo`. Replace the example subnet with a network you are authorized to scan. ARP discovery works on the local Layer-2 network; it is not an Internet-wide scanner.
 
-### NOTE: It will work with both, python2 and python3. You just need to install scapy module for both.
-### Installation for scapy -->
-<code>pip install scapy</code>
+## Tests
 
-### OR
+The unit tests validate argument parsing and output formatting without transmitting network packets:
 
-<code>pip3 install scapy-python3</code>
+```bash
+python -m unittest discover -v
+python -m compileall -q .
+```
 
-## How to use?
+GitHub Actions runs these checks on pushes and pull requests. A successful unit-test run does not prove that packet capture works on every operating system or network adapter.
 
-<code>USE --help for help menu (sudo python3 network_scanner.py --help)</code>
+## Program flow
 
+```mermaid
+flowchart TD
+    A[Start] --> B[Parse target CIDR]
+    B --> C{Target supplied?}
+    C -- No --> D[Show CLI usage error]
+    C -- Yes --> E[Load Scapy]
+    E --> F[Build ARP request and broadcast frame]
+    F --> G[Send request on local network]
+    G --> H[Collect ARP replies]
+    H --> I[Format IP and MAC results]
+    I --> J[Display results]
+    J --> K[Exit]
+```
 
+## Project files
 
-### Example -->
+- `network_scanner.py` — scanner and CLI entry point
+- `requirements.txt` — runtime dependency
+- `test_network_scanner.py` — offline unit tests
+- `.github/workflows/python-ci.yml` — automated CI checks
 
-<code>sudo python3 network_scanner.py -t 192.168.137.2 </code><br>
-<code>sudo python3 network_scanner.py --target 192.168.137.1/24</code>
+## Troubleshooting
 
-### Output -->
+- **Scapy import error:** activate the virtual environment and install `requirements.txt`.
+- **Permission denied:** use an elevated terminal and verify packet-capture permissions.
+- **No hosts found:** verify the subnet, interface, local network, and firewall settings.
+- **Unsupported adapter:** install the packet-capture driver required by your operating system.
 
-<pre>
-  IP                      MAC_Address
------------------------------------------
-192.168.1.1             00:1a:2b:3c:4d:5e
-192.168.1.3             08:00:27:ab:cd:ef
-192.168.1.5             dc:a6:32:11:22:33
-192.168.1.10            3c:52:82:aa:bb:cc
-</pre>
+## Safety
+
+Only scan networks for which you have explicit authorization. The tool sends ARP discovery traffic and does not attempt exploitation or authentication.
