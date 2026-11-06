@@ -1,5 +1,15 @@
 # Network Scanner
 
+
+## Get this repository
+
+Clone the current project from its canonical GitHub location, then follow the installation and usage steps below.
+
+```bash
+git clone https://github.com/cyberworlduniversity/Network_scanning.git
+cd Network_scanning
+```
+
 A Python 3 command-line utility that discovers responding IPv4 hosts on a local network using ARP. Use it only on networks you own or have explicit permission to assess.
 
 ## Requirements
