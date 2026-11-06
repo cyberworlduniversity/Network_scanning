@@ -83,3 +83,55 @@ flowchart TD
 ## Safety
 
 Only scan networks for which you have explicit authorization. The tool sends ARP discovery traffic and does not attempt exploitation or authentication.
+
+
+## Repository Quick Start
+
+Clone this repository and enter its directory:
+
+```bash
+git clone https://github.com/cyberworlduniversity/Network_scanning.git
+cd Network_scanning
+```
+
+### Requirements and installation
+
+- Python 3.10+ is recommended.
+- Create an isolated environment and install the pinned project dependencies:
+
+```bash
+python -m venv .venv
+# Linux/macOS: source .venv/bin/activate
+# Windows PowerShell: .venv\\Scripts\\Activate.ps1
+python -m pip install -r requirements.txt
+```
+
+### Run
+
+```bash
+python network_scanner.py
+```
+
+If the program presents command-line options, run `python network_scanner.py --help` to view the options supported by the current version. Use a test target or sample input first.
+
+### Validate the source
+
+```bash
+python -m compileall -q .
+```
+
+Use only on networks you own or are explicitly authorized to assess.
+
+### Program flow
+
+```mermaid
+flowchart TD
+    A[Start] --> B[Load configuration and input]
+    B --> C{Input valid?}
+    C -- No --> D[Show usage or validation error]
+    C -- Yes --> E[Run Network scanning analysis]
+    E --> F[Collect findings]
+    F --> G[Display or save results]
+    G --> H[Exit]
+    D --> H
+```
